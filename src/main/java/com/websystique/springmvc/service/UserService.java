@@ -13,11 +13,13 @@ public interface UserService {
 	
 	void saveUser(User user);
 	
-	void updateUser(User user);
+	void updateUser(User user,int edit);
 	
 	void deleteUserBySSO(String sso);
 
-	List<User> findAllUsers(); 
+	List<User> findAllUsers();
+	
+	List<User> findAllUsers(int id);
 	
 	boolean isUserSSOUnique(Integer id, String sso);
 

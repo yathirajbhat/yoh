@@ -16,6 +16,7 @@ public class UserDocumentDaoImpl extends AbstractDao<Integer, UserDocument> impl
 	@SuppressWarnings("unchecked")
 	public List<UserDocument> findAll() {
 		Criteria crit = createEntityCriteria();
+		crit.add(Restrictions.eq("isDeleted",1));
 		return (List<UserDocument>)crit.list();
 	}
 
@@ -33,13 +34,14 @@ public class UserDocumentDaoImpl extends AbstractDao<Integer, UserDocument> impl
 		Criteria crit = createEntityCriteria();
 		Criteria userCriteria = crit.createCriteria("user");
 		userCriteria.add(Restrictions.eq("id", userId));
+		crit.add(Restrictions.eq("isDeleted",1));
 		return (List<UserDocument>)crit.list();
 	}
 
 	
 	public void deleteById(int id) {
 		UserDocument document =  getByKey(id);
-		delete(document);
+		document.setIsDeleted(0);
 	}
-	
+
 }

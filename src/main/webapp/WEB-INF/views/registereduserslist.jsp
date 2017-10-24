@@ -21,10 +21,12 @@
 			<table class="table table-hover">
 	    		<thead>
 		      		<tr>
-				        <th>Firstname</th>
-				        <th>Lastname</th>
+				        <th>First Name</th>
+				        <th>Last Name</th>
 				        <th>Email</th>
 				        <th>SSO ID</th>
+				        <th>Client</th>
+				        <th>Contact NO</th>
 				        <sec:authorize access="hasRole('ADMIN')">
 				        	<th width="100"></th>
 				        </sec:authorize>
@@ -44,6 +46,8 @@
 						<td>${user.lastName}</td>
 						<td>${user.email}</td>
 						<td>${user.ssoId}</td>
+						<td>${user.client}</td>
+						<td>${user.phone}</td>
 					    <sec:authorize access="hasRole('ADMIN')">
 							<td><a href="<c:url value='/edit-registeruser-${user.ssoId}' />" class="btn btn-success custom-width">edit</a></td>
 				        </sec:authorize>
@@ -51,7 +55,7 @@
 							<td><a href="<c:url value='/delete-registeruser-${user.ssoId}' />" class="btn btn-danger custom-width">delete</a></td>
         				</sec:authorize>
         				<sec:authorize access="hasRole('ADMIN') or hasRole('DBA')">
-							<td><a href="<c:url value='/companylist' />" class="btn btn-blue extra-width">List Companies</a></td>
+							<td><a href="<c:url value='/companylist-${user.id}' />" class="btn btn-blue extra-width">List Companies</a></td>
 				        </sec:authorize>
 					</tr>
 				</c:forEach>

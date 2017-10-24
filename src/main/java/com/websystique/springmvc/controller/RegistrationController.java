@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import com.websystique.springmvc.converter.RoleToUserProfileConverter;
 import com.websystique.springmvc.model.RegisterUser;
 import com.websystique.springmvc.model.UserProfile;
 import com.websystique.springmvc.service.UserProfileService;
@@ -36,6 +39,7 @@ import com.websystique.springmvc.service.RegisterUserService;
 @SessionAttributes("roles")
 public class RegistrationController {
 
+	static final Logger logger = LoggerFactory.getLogger(RegistrationController.class);
 	@Autowired
 	RegisterUserService userService;
 	
@@ -101,7 +105,7 @@ public class RegistrationController {
 		    result.addError(ssoError);
 			return "userregistration";
 		}
-		
+		user.setIsDeleted(1);
 		userService.saveUser(user);
 
 		model.addAttribute("success", "User " + user.getFirstName() + " "+ user.getLastName() + " registered successfully");
@@ -143,7 +147,7 @@ public class RegistrationController {
 		}*/
 
 
-		userService.updateUser(user);
+		userService.updateUser(user,1);
 
 		model.addAttribute("success", "User " + user.getFirstName() + " "+ user.getLastName() + " updated successfully");
 		model.addAttribute("loggedinuser", getPrincipal());
@@ -156,8 +160,10 @@ public class RegistrationController {
 	 */
 	@RequestMapping(value = { "/delete-registeruser-{ssoId}" }, method = RequestMethod.GET)
 	public String deleteUser(@PathVariable String ssoId) {
-		userService.deleteUserBySSO(ssoId);
-		return "redirect:/registereduserslist";
+		//userService.deleteUserBySSO(ssoId);
+		RegisterUser user= userService.findBySSO(ssoId);
+		userService.updateUser(user, 0);
+		return "redirect:/";
 	}
 	
 
@@ -166,6 +172,7 @@ public class RegistrationController {
 	 */
 	@ModelAttribute("roles")
 	public List<UserProfile> initializeProfiles() {
+		logger.info("initializeProfiles");
 		return userProfileService.findAll();
 	}
 	
@@ -184,6 +191,7 @@ public class RegistrationController {
 	 */
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String loginPage() {
+		logger.info("Login Module");
 		if (isCurrentAuthenticationAnonymous()) {
 			return "login";
 	    } else {
@@ -218,6 +226,7 @@ public class RegistrationController {
 		} else {
 			userName = principal.toString();
 		}
+		logger.info(userName + "Valid username");
 		return userName;
 	}
 	
@@ -225,6 +234,7 @@ public class RegistrationController {
 	 * This method returns true if users is already authenticated [logged-in], else false.
 	 */
 	private boolean isCurrentAuthenticationAnonymous() {
+		logger.info("isCurrentAuthenticationAnonymous");
 	    final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 	    return authenticationTrustResolver.isAnonymous(authentication);
 	}

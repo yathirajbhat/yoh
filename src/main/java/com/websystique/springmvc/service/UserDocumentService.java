@@ -16,4 +16,6 @@ public interface UserDocumentService {
 	
 	void deleteById(int id);
 	
+	void updateDocument(int id);
+	
 }

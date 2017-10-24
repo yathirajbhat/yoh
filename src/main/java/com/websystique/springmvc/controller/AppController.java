@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -25,20 +27,25 @@ import org.springframework.ui.ModelMap;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.websystique.springmvc.configuration.ApplicationInitializer;
 import com.websystique.springmvc.model.ClientContents;
 import com.websystique.springmvc.model.ContentPlayingNow;
 import com.websystique.springmvc.model.FileBucket;
+import com.websystique.springmvc.model.RegisterUser;
 import com.websystique.springmvc.model.User;
 import com.websystique.springmvc.model.UserDocument;
 import com.websystique.springmvc.service.ContentPlayingNowService;
+import com.websystique.springmvc.service.RegisterUserService;
 import com.websystique.springmvc.service.UserDocumentService;
 import com.websystique.springmvc.service.UserService;
 import com.websystique.springmvc.util.EncryptUtils;
@@ -49,7 +56,7 @@ import com.websystique.springmvc.util.FileValidator;
 @Controller
 @SessionAttributes("roles")
 public class AppController {
-
+	static final Logger logger = LoggerFactory.getLogger(AppController.class);
 	@Autowired
 	UserService userService;
 	
@@ -65,6 +72,9 @@ public class AppController {
 	@Autowired
 	ContentPlayingNowService contentPlayingNowService;
 	
+	@Autowired
+	RegisterUserService registerUserService;
+	
 	@InitBinder("fileBucket")
 	protected void initBinder(WebDataBinder binder) {
 	   binder.setValidator(fileValidator);
@@ -73,22 +83,29 @@ public class AppController {
 	/**
 	 * This method will list all existing users.
 	 */
-	@RequestMapping(value = { "/companylist" }, method = RequestMethod.GET)
-	public String listUsers(ModelMap model) {
-
-		List<User> users = userService.findAllUsers();
+	@RequestMapping(value = { "/companylist-{registerUser}" }, method = RequestMethod.GET)
+	public String listUsers(ModelMap model,@PathVariable Integer registerUser) {
+		//List<User> users = userService.findAllUsers();
+		List<User> users = userService.findAllUsers(registerUser);
 		model.addAttribute("users", users);
-		return "companylist";
+		model.addAttribute("register", registerUser);
+		return "/companylist";
 	}
 
+	@RequestMapping(value = "/testn", method = {RequestMethod.POST},headers="Accept=application/json")
+	public String test(@RequestParam  String cityName){
+		return cityName;
+	}
+	
 	/**
 	 * This method will provide the medium to add a new user.
 	 */
-	@RequestMapping(value = { "/newcompany" }, method = RequestMethod.GET)
-	public String newUser(ModelMap model) {
+	@RequestMapping(value = { "/newcompany-{registerUser}" }, method = RequestMethod.GET)
+	public String newUser(ModelMap model,@PathVariable Integer registerUser) {
 		User user = new User();
 		model.addAttribute("user", user);
 		model.addAttribute("edit", false);
+		model.addAttribute("register",registerUser);
 		return "companyregistration";
 	}
 
@@ -96,8 +113,8 @@ public class AppController {
 	 * This method will be called on form submission, handling POST request for
 	 * saving user in database. It also validates the user input
 	 */
-	@RequestMapping(value = { "/newcompany" }, method = RequestMethod.POST)
-	public String saveUser(@Valid User user, BindingResult result,
+	@RequestMapping(value = { "/newcompany-{register}" }, method = RequestMethod.POST)
+	public String saveUser(@Valid User user, BindingResult result,@PathVariable Integer register,
 			ModelMap model) {
 
 		if (result.hasErrors()) {
@@ -117,12 +134,13 @@ public class AppController {
 		    result.addError(ssoError);
 			return "companyregistration";
 		}
-		
+		RegisterUser registerUsers=registerUserService.findById(register);
+		user.setIsDeleted(1);
+		user.setRegisterUser(registerUsers);
 		userService.saveUser(user);
 		
 		model.addAttribute("user", user);
 		model.addAttribute("success", "User " + user.getFirstName() + " "+ user.getLastName() + " registered successfully");
-		//return "success";
 		return "companyregistrationsuccess";
 	}
 
@@ -147,10 +165,11 @@ public class AppController {
 			ModelMap model, @PathVariable String ssoId) {
 
 		if (result.hasErrors()) {
+			logger.info(result.getFieldError().toString());
 			return "companyregistration";
 		}
-
-		userService.updateUser(user);
+		user.setIsDeleted(1);
+		userService.updateUser(user,1);
 
 		model.addAttribute("success", "User " + user.getFirstName() + " "+ user.getLastName() + " updated successfully");
 		return "companyregistrationsuccess";
@@ -160,10 +179,12 @@ public class AppController {
 	/**
 	 * This method will delete an user by it's SSOID value.
 	 */
-	@RequestMapping(value = { "/delete-company-{ssoId}" }, method = RequestMethod.GET)
-	public String deleteUser(@PathVariable String ssoId) {
-		userService.deleteUserBySSO(ssoId);
-		return "redirect:/companylist";
+	@RequestMapping(value = { "/delete-company-{ssoId}-{registerUserId}" }, method = RequestMethod.GET)
+	public String deleteUser(@PathVariable String ssoId,@PathVariable Integer registerUserId) {
+		//userService.deleteUserBySSO(ssoId);
+		User user=userService.findBySSO(ssoId);
+		userService.updateUser(user, 0);
+		return "redirect:/companylist-"+registerUserId;
 	}
 	
 
@@ -178,7 +199,7 @@ public class AppController {
 
 		List<UserDocument> documents = userDocumentService.findAllByUserId(userId);
 		model.addAttribute("documents", documents);
-		
+		model.addAttribute("user", user);
 		return "managedocuments";
 	}
 	
@@ -186,11 +207,14 @@ public class AppController {
 	@RequestMapping(value = { "/download-document-{userId}-{docId}" }, method = RequestMethod.GET)
 	public String downloadDocument(@PathVariable int userId, @PathVariable int docId, HttpServletResponse response) throws IOException {
 		UserDocument document = userDocumentService.findById(docId);
+		File f=null;
+		f= new File(document.getFileLocation()+File.separator+document.getName());
 		response.setContentType(document.getType());
-        response.setContentLength(document.getContent().length);
+        response.setContentLength(Files.readAllBytes(f.toPath()).length);
         response.setHeader("Content-Disposition","attachment; filename=\"" + document.getName() +"\"");
  
-        FileCopyUtils.copy(document.getContent(), response.getOutputStream());
+        FileCopyUtils.copy(Files.readAllBytes(f.toPath()), response.getOutputStream());
+        response.flushBuffer();
  
  		return "redirect:/add-document-"+userId;
 	}
@@ -211,14 +235,10 @@ public class AppController {
  		return "trnsfrered";
 	}*/
 	
-	@RequestMapping(value = { "/content-{id}" }, method = RequestMethod.GET)
-	public String getdownloadContent(@PathVariable int id,@Valid ClientContents clientContents, HttpServletResponse response,HttpServletRequest httpServletRequest) throws IOException {
-		//UserDocument document = userDocumentService.findById(1);
+	@RequestMapping(value = { "/content/{id}/{date}" }, method = RequestMethod.GET)
+	public String getdownloadContent(@PathVariable int id,@PathVariable String date,@Valid ClientContents clientContents, HttpServletResponse response,HttpServletRequest httpServletRequest) throws IOException {
 		List<ContentPlayingNow> contentPlayingNow = contentPlayingNowService.findByDeviceId(id);
-		//List<ContentPlayingNow> contentPlayingNow = contentPlayingNowService.findByDeviceId(clientContents.getDeviceId());
 		File f=null;
-		String a=httpServletRequest.getParameter("ABC");
-		System.out.println(a);
 		for (ContentPlayingNow contentPlayingNow2 : contentPlayingNow) {
 			f= new File(contentPlayingNow2.getUserDocument().getFileLocation()+File.separator+contentPlayingNow2.getUserDocument().getName());
 			 	response.setContentType(contentPlayingNow2.getUserDocument().getType());
@@ -235,15 +255,15 @@ public class AppController {
 
 	@RequestMapping(value = { "/delete-document-{userId}-{docId}" }, method = RequestMethod.GET)
 	public String deleteDocument(@PathVariable int userId, @PathVariable int docId) {
+		System.out.println(docId);
 		userDocumentService.deleteById(docId);
 		return "redirect:/add-document-"+userId;
 	}
 
 	@RequestMapping(value = { "/add-document-{userId}" }, method = RequestMethod.POST)
 	public String uploadDocument(@Valid FileBucket fileBucket, BindingResult result, ModelMap model, @PathVariable int userId) throws IOException{
-		
+		logger.info("Adding Document");
 		if (result.hasErrors()) {
-			System.out.println("validation errors");
 			User user = userService.findById(userId);
 			model.addAttribute("user", user);
 
@@ -252,8 +272,6 @@ public class AppController {
 			
 			return "managedocuments";
 		} else {
-			
-			System.out.println("Fetching file");
 			
 			User user = userService.findById(userId);
 			model.addAttribute("user", user);
@@ -275,20 +293,21 @@ public class AppController {
 	
 	
 	private void saveDocument(FileBucket fileBucket, User user) throws IOException{
-		
+		logger.info("Saving Document for the user");
 		UserDocument document = new UserDocument();
 		
 		MultipartFile multipartFile = fileBucket.getFile();
-		multipartFile.transferTo(new File("../images"+multipartFile.getOriginalFilename()));
+		multipartFile.transferTo(new File(multipartFile.getOriginalFilename()));
 		//fileBucket.setFile(null);
 		document.setName(multipartFile.getOriginalFilename());
 		document.setDescription("Please call 9945672422");
 		document.setType(multipartFile.getContentType());
 		document.setContent(null);
 		document.setUser(user);
-		document.setFileLocation("../images"+multipartFile.getOriginalFilename());
+		document.setFileLocation(ApplicationInitializer.LOCATION);
 		document.setUniqueIdentifier(EncryptUtils.base64encode(multipartFile.getOriginalFilename()));
 		document.setPlayGroup(1);
+		document.setIsDeleted(1);
 		userDocumentService.saveDocument(document);
 	}
 	

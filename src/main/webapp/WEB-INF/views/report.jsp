@@ -17,7 +17,7 @@
 	<%@include file="authheader.jsp" %>
 		<div class="panel panel-default">
 			  <!-- Default panel contents -->
-		  	<div class="panel-heading"><span class="lead">List of Documents </span> <span>Go to <a href="<c:url value='/list' />">Users List</a></span></div>
+		  	<div class="panel-heading"><span class="lead">List of Documents </span></div>
 		  	<div class="tablecontainer">
 				<table class="table table-hover">
 		    		<thead>
@@ -45,7 +45,7 @@
 							<td>${doc.device.deviceCategory.numberOfTimesPlayed} times / Day</td>
 							<td>${doc.device.deviceCategory.secondsPlayed} Seconds </td>
 							<td>${doc.device.deviceCategory.secondsPlayed*doc.device.deviceCategory.price*doc.device.deviceCategory.numberOfTimesPlayed}</td>
-							<td>    ${doc.device.deviceCategory.dayStartHour} AM</td>
+							<td>${doc.device.deviceCategory.dayStartHour} AM</td>
 							<td>${doc.device.deviceCategory.workingHours}Hrs/day</td>
 						 </tr>
 					</c:forEach>
@@ -55,7 +55,7 @@
 		</div>
 	 	<div class="well floatRight">
 	 	<sec:authorize access="hasRole('ADMIN') or hasRole('DBA')">
-	 		Go to <a href="<c:url value='/companylist' />">Company List</a>
+	 		Go to <a href="<c:url value='/' />">User List</a>
 	 	</sec:authorize>
 	 	</div>
    	</div>

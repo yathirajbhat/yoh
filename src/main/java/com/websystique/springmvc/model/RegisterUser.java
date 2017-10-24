@@ -48,6 +48,17 @@ public class RegisterUser implements Serializable{
 	@NotEmpty
 	@Column(name="EMAIL", nullable=false)
 	private String email;
+	
+	@NotEmpty
+	@Column(name="PHONE", nullable=false)
+	private String phone;
+	
+	@NotEmpty
+	@Column(name="CLIENT", nullable=false)
+	private String client;
+	
+	@Column(name="IS_DELETED", nullable=false)
+	private int isDeleted;
 
 	@NotEmpty
 	@ManyToMany(fetch = FetchType.LAZY)
@@ -112,6 +123,30 @@ public class RegisterUser implements Serializable{
 		this.userProfiles = userProfiles;
 	}
 
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public int getIsDeleted() {
+		return isDeleted;
+	}
+
+	public void setIsDeleted(int isDeleted) {
+		this.isDeleted = isDeleted;
+	}
+
+	public String getClient() {
+		return client;
+	}
+
+	public void setClient(String client) {
+		this.client = client;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -147,13 +182,12 @@ public class RegisterUser implements Serializable{
 	 * DO-NOT-INCLUDE passwords in toString function.
 	 * It is done here just for convenience purpose.
 	 */
+
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", ssoId=" + ssoId + ", password=" + password
-				+ ", firstName=" + firstName + ", lastName=" + lastName
-				+ ", email=" + email + "]";
+		return "RegisterUser [id=" + id + ", ssoId=" + ssoId + ", password=" + password + ", firstName=" + firstName
+				+ ", lastName=" + lastName + ", email=" + email + ", phone=" + phone + ", client=" + client
+				+ ", isDeleted=" + isDeleted + ", userProfiles=" + userProfiles + "]";
 	}
 
-
-	
 }

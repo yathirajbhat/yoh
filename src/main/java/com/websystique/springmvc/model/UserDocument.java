@@ -45,6 +45,8 @@ public class UserDocument {
 	@Column(name = "play_group")
 	private Integer playGroup;
 	
+	@Column(name ="IS_DELETED")
+	private int isDeleted;
 	
 	public Integer getId() {
 		return id;
@@ -116,6 +118,14 @@ public class UserDocument {
 
 	public void setPlayGroup(Integer playGroup) {
 		this.playGroup = playGroup;
+	}
+
+	public int getIsDeleted() {
+		return isDeleted;
+	}
+
+	public void setIsDeleted(int isDeleted) {
+		this.isDeleted = isDeleted;
 	}
 
 	@Override

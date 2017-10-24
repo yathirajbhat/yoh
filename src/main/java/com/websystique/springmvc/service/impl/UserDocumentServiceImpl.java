@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.websystique.springmvc.dao.UserDocumentDao;
+import com.websystique.springmvc.model.User;
 import com.websystique.springmvc.model.UserDocument;
 import com.websystique.springmvc.service.UserDocumentService;
 
@@ -36,5 +37,19 @@ public class UserDocumentServiceImpl implements UserDocumentService{
 	public void deleteById(int id){
 		dao.deleteById(id);
 	}
-	
+
+	/*
+	 * Since the method is running with Transaction, No need to call hibernate update explicitly.
+	 * Just fetch the entity from db and update it with proper values within transaction.
+	 * It will be updated in db once transaction ends. 
+	 */
+	@Override
+	public void updateDocument(int id) {
+			UserDocument entity = dao.findById(id);
+			if(entity!=null){
+				entity.setIsDeleted(id);
+		}
+		
+	}
+
 }

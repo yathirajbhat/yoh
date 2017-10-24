@@ -9,6 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -40,7 +42,18 @@ public class User {
 	@NotEmpty
 	@Column(name="COMPANY", nullable=false)
 	private String company;
-
+	
+	@NotEmpty
+	@Column(name="PHONE",nullable=false)
+	private String phone;
+	
+	@ManyToOne(optional = false)
+	@JoinColumn(name="REGISTER_USER")
+	private RegisterUser registerUser;
+	
+	@Column(name ="IS_DELETED")
+	private int isDeleted;
+	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<UserDocument> userDocuments = new HashSet<UserDocument>();
 	
@@ -100,6 +113,30 @@ public class User {
 		this.company = company;
 	}
 
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public RegisterUser getRegisterUser() {
+		return registerUser;
+	}
+
+	public void setRegisterUser(RegisterUser registerUser) {
+		this.registerUser = registerUser;
+	}
+	
+	public int getIsDeleted() {
+		return isDeleted;
+	}
+
+	public void setIsDeleted(int isDeleted) {
+		this.isDeleted = isDeleted;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -134,7 +171,8 @@ public class User {
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", ssoId=" + ssoId + ", firstName=" + firstName + ", lastName=" + lastName
-				+ ", email=" + email + ", company=" + company + ", userDocuments=" + userDocuments + "]";
+				+ ", email=" + email + ", company=" + company + ", phone=" + phone + ", registerUser=" + registerUser
+				+ ", isDeleted=" + isDeleted + ", userDocuments=" + userDocuments + "]";
 	}
 
 }

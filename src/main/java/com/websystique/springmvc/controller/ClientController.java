@@ -1,8 +1,5 @@
 package com.websystique.springmvc.controller;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,7 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,6 +41,7 @@ import com.websystique.springmvc.service.UserDocumentService;
 import com.websystique.springmvc.util.EncryptUtils;
 
 @RestController
+@RequestMapping("/client/")
 public class ClientController {
 
 	@Autowired
@@ -62,7 +62,7 @@ public class ClientController {
 	@Autowired
 	DeviceCategoryService deviceCategoryService;
 	
-	@RequestMapping(value = "/ads", method = RequestMethod.POST,headers="Accept=application/json")
+	@RequestMapping(value = "/ads", method = RequestMethod.POST)
 	public AppResponse getFile(@RequestParam (name="id") String id){
 		List<ContentPlayingNow> cont = contentPlayingNowService.findByDeviceId(Integer.parseInt(id));
 		for (ContentPlayingNow contentPlayingNow : cont) {
@@ -94,23 +94,23 @@ public class ClientController {
 		 return response;
 	}
 	
-	@RequestMapping(value = "/devices", method = RequestMethod.POST,headers="Accept=application/json")
+	@RequestMapping(value = "/devices",method = {RequestMethod.POST})
 	public List<Device> getAllDevices(@RequestParam (name="deviceLocationId") String deviceLocationId){
 		return deviceService.getDevicesByLocation(Integer.parseInt(deviceLocationId));
 	}
 	
-	@RequestMapping(value = "/deviceByLocations", method = RequestMethod.POST,headers="Accept=application/json")
+	@RequestMapping(value = "/deviceByLocations",method =RequestMethod.POST)
 	public List<Device> getDevicesByLocations(@RequestBody List<Integer> deviceLocationId){
 		return deviceService.getDevicesByLocation(deviceLocationId);
 	}
 	
-	@RequestMapping(value = "/deviceLocation", method = RequestMethod.POST,headers="Accept=application/json")
+	@RequestMapping(value = "/deviceLocation",method = {RequestMethod.POST})
 	public List<DeviceLocation> getAllDevicesByLocation(@RequestParam (name="cityName") String cityName){
 		return deviceLocationService.getLocationByCity(cityName);
 	}
 	
 	@SuppressWarnings("deprecation")
-	@RequestMapping(value = "/saveContents", method = RequestMethod.POST,headers="Accept=application/json")
+	@RequestMapping(value = "/saveContents",method = {RequestMethod.POST})
 	public Response saveContent(@RequestBody ContentRequest contentRequest){
 		Response response = new Response();
 		String value=getDateAfter1Month(contentRequest.getEndDate());
@@ -145,7 +145,7 @@ public class ClientController {
 	}
 	
 	@SuppressWarnings("deprecation")
-	@RequestMapping(value = "/price", method = RequestMethod.POST,headers="Accept=application/json")
+	@RequestMapping(value = "/price",method=RequestMethod.POST)
 	public PriceResponse getPrice(@RequestBody PriceRequest priceRequest){
 		PriceResponse response = new PriceResponse();
 		String value=getDateAfter1Month(priceRequest.getEndDate());
@@ -325,7 +325,7 @@ public class ClientController {
 			datesFull=new ArrayList<String>();
 			for (String date : dateList) {
 				int no=contentPlayingNowService.getTotalSlotsInDay(date,device);
-				if(no>2)
+				if(no>maxSlot)
 					datesFull.add(date);
 			}
 			

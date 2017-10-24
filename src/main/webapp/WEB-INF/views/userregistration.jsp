@@ -74,7 +74,31 @@
 					</div>
 				</div>
 			</div>
-	
+			
+			<div class="row">
+				<div class="form-group col-md-12">
+					<label class="col-md-3 control-lable" for="lastName">Client</label>
+					<div class="col-md-7">
+						<form:input type="text" path="client" id="client" class="form-control input-sm" />
+						<div class="has-error">
+							<form:errors path="client" class="help-inline"/>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="form-group col-md-12">
+					<label class="col-md-3 control-lable" for="phone">Contact No</label>
+					<div class="col-md-7">
+						<form:input type="text" path="phone" id="phone" class="form-control input-sm" />
+						<div class="has-error">
+							<form:errors path="phone" class="help-inline"/>
+						</div>
+					</div>
+				</div>
+			</div>
+			
 			<div class="row">
 				<div class="form-group col-md-12">
 					<label class="col-md-3 control-lable" for="email">Email</label>
@@ -103,10 +127,10 @@
 				<div class="form-actions floatRight">
 					<c:choose>
 						<c:when test="${edit}">
-							<input type="submit" value="Update" class="btn btn-primary btn-sm"/> or <a href="<c:url value='/userlist' />">Cancel</a>
+							<input type="submit" value="Update" class="btn btn-primary btn-sm"/> or <a href="<c:url value='/userslist' />">Cancel</a>
 						</c:when>
 						<c:otherwise>
-							<input type="submit" value="Register" class="btn btn-primary btn-sm"/> or <a href="<c:url value='/userlist' />">Cancel</a>
+							<input type="submit" value="Register" class="btn btn-primary btn-sm"/> or <a href="<c:url value='/userslist' />">Cancel</a>
 						</c:otherwise>
 					</c:choose>
 				</div>

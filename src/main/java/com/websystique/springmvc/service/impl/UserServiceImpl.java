@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService{
 	 * Just fetch the entity from db and update it with proper values within transaction.
 	 * It will be updated in db once transaction ends. 
 	 */
-	public void updateUser(User user) {
+	public void updateUser(User user,int edit) {
 		User entity = dao.findById(user.getId());
 		if(entity!=null){
 			entity.setSsoId(user.getSsoId());
@@ -45,6 +45,8 @@ public class UserServiceImpl implements UserService{
 			entity.setEmail(user.getEmail());
 			entity.setUserDocuments(user.getUserDocuments());
 			entity.setCompany(user.getCompany());
+			entity.setPhone(user.getPhone());
+			entity.setIsDeleted(edit);
 		}
 	}
 
@@ -60,6 +62,11 @@ public class UserServiceImpl implements UserService{
 	public boolean isUserSSOUnique(Integer id, String sso) {
 		User user = findBySSO(sso);
 		return ( user == null || ((id != null) && (user.getId() == id)));
+	}
+
+	@Override
+	public List<User> findAllUsers(int id) {
+		return dao.findAllUsers(id);
 	}
 	
 }

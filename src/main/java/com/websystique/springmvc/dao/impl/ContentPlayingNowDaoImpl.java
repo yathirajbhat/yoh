@@ -18,7 +18,6 @@ public class ContentPlayingNowDaoImpl extends AbstractDao<Integer, ContentPlayin
 	@SuppressWarnings("unchecked")
 	public List<ContentPlayingNow> findByDeviceId(int deviceId){
 		Criteria crit = createEntityCriteria();
-		crit.setTimeout(50000);
 		Criteria deviceCrit = crit.add(Restrictions.ne("isDeleted",1)).createCriteria("device");
 		deviceCrit.add(Restrictions.eq("id", deviceId));
 		//Criteria userDocCrit = crit.createCriteria("userDocument");
@@ -43,9 +42,11 @@ public class ContentPlayingNowDaoImpl extends AbstractDao<Integer, ContentPlayin
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<ContentPlayingNow> getContent(int userId) {
 		Query query= getSession().createQuery("from ContentPlayingNow cpn where cpn.userDocument.user.id = :id");
+		System.out.println(query.toString());
 		 query.setInteger("id", userId);
 		return (List<ContentPlayingNow>)query.list();
 	}

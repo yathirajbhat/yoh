@@ -21,7 +21,7 @@
 		</span>
 		
 		<span class="well floatRight">
-			<a href="<c:url value='/companylist' />">List Companies</a>	
+			<a href="<c:url value='/companylist-${user.registerUser.id}' />">List Companies</a>	
 		</span>
 	</div>
 </body>

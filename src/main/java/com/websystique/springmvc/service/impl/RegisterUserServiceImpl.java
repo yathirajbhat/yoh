@@ -41,7 +41,7 @@ public class RegisterUserServiceImpl implements RegisterUserService{
 	 * Just fetch the entity from db and update it with proper values within transaction.
 	 * It will be updated in db once transaction ends. 
 	 */
-	public void updateUser(RegisterUser user) {
+	public void updateUser(RegisterUser user,int edit) {
 		RegisterUser entity = dao.findById(user.getId());
 		if(entity!=null){
 			entity.setSsoId(user.getSsoId());
@@ -52,6 +52,9 @@ public class RegisterUserServiceImpl implements RegisterUserService{
 			entity.setLastName(user.getLastName());
 			entity.setEmail(user.getEmail());
 			entity.setUserProfiles(user.getUserProfiles());
+			entity.setPhone(user.getPhone());
+			entity.setClient(user.getClient());
+			entity.setIsDeleted(edit);
 		}
 	}
 

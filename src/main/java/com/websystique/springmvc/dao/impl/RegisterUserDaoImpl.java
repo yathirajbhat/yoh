@@ -30,9 +30,9 @@ public class RegisterUserDaoImpl extends AbstractUserDao<Integer, RegisterUser> 
 	}
 
 	public RegisterUser findBySSO(String sso) {
-		logger.info("SSO : {}", sso);
 		Criteria crit = createEntityCriteria();
 		crit.add(Restrictions.eq("ssoId", sso));
+		crit.add(Restrictions.eq("isDeleted", 1));
 		RegisterUser user = (RegisterUser)crit.uniqueResult();
 		if(user!=null){
 			Hibernate.initialize(user.getUserProfiles());
@@ -44,6 +44,7 @@ public class RegisterUserDaoImpl extends AbstractUserDao<Integer, RegisterUser> 
 	public List<RegisterUser> findAllUsers() {
 		Criteria criteria = createEntityCriteria().addOrder(Order.asc("firstName"));
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);//To avoid duplicates.
+		criteria.add(Restrictions.eq("isDeleted", 1));
 		List<RegisterUser> users = (List<RegisterUser>) criteria.list();
 		
 		// No need to fetch userProfiles since we are not showing them on list page. Let them lazy load. 

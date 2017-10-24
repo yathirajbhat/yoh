@@ -13,7 +13,7 @@ public interface RegisterUserService {
 	
 	void saveUser(RegisterUser user);
 	
-	void updateUser(RegisterUser user);
+	void updateUser(RegisterUser user,int edit);
 	
 	void deleteUserBySSO(String sso);
 

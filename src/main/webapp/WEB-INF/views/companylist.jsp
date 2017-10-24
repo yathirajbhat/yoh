@@ -26,6 +26,7 @@
 					        <th>Last Name</th>
 					        <th>Email</th>
 					        <th>SSO ID</th>
+					        <th>Contact No</th>
 					        <th>Company<th>
 					        <th width="50"></th>
 					        <th width="50"></th>
@@ -42,12 +43,13 @@
 							<td>${user.lastName}</td>
 							<td>${user.email}</td>
 							<td>${user.ssoId}</td>
+							<td>${user.phone}</td>
 							<td>${user.company}</td>
 							<td><a href="<c:url value='/reports-${user.id}' />" class="btn btn-blue custom-width">report</a></td>
 							<td><a href="<c:url value='/add-document-${user.id}' />" class="btn btn-blue custom-width">campaign</a></td>
 							<td><a href="<c:url value='/edit-company-${user.ssoId}' />" class="btn btn-success custom-width">edit</a></td>
 							<sec:authorize access="hasRole('ADMIN')">
-							<td><a href="<c:url value='/delete-company-${user.ssoId}' />" class="btn btn-danger custom-width">delete</a></td>
+							<td><a href="<c:url value='/delete-company-${user.ssoId}-${user.registerUser.id}' />" class="btn btn-danger custom-width">delete</a></td>
 				        </sec:authorize>
 						</tr>
 					</c:forEach>
@@ -56,7 +58,7 @@
 		    </div>
 		</div>
 	 	<div class="well">
-	 		<a href="<c:url value='/newcompany' />">Add New Company Details</a>
+	 		<a href="<c:url value='/newcompany-${register}'/>">Add New Company Details</a>
 	 	</div>
    	</div>
 </body>

@@ -14,6 +14,7 @@
   <script type="text/javascript">
          
          var numbers;
+		 var UniRL="http://localhost:8080/yohoads/client";
             function sayHello(id)
 			{       
 			   
@@ -40,8 +41,9 @@
 	function sendData() {
 		var e=document.getElementById('ct');
     $.ajax({
-        url: 'http://localhost:8080/Spring4MVCFileUploadDownloadWithHibernate/deviceLocation?cityName="'+e.options[e.selectedIndex].value+'"',
-        type: 'POST',
+        url: UniRL + '/deviceLocation?cityName="'+e.options[e.selectedIndex].value+'"',
+        type: "POST",
+        contentType:"application/json",
 		data:'',
         dataType: 'json',
 		success:function(response){
@@ -84,7 +86,7 @@ function getDevices() {
 	//var obj = {'1','2'};
 
     $.ajax({
-        url: 'http://localhost:8080/Spring4MVCFileUploadDownloadWithHibernate/deviceByLocations', //+ e.options[e.selectedIndex].id,
+        url: UniRL + '/deviceByLocations', //+ e.options[e.selectedIndex].id,
         type: 'POST',
 		contentType:'application/json',
 		data:'['+values+']',
@@ -95,12 +97,9 @@ function getDevices() {
 							 {
 								for(var j=0;j<1;j++)
 								{
-									//console.log(response[i][j].devceLocationName);
-									//console.log('<option id='+response[i][j].id+'>'+response[i][j].deviceLocation.devceLocationName+' - '+response[i][j].deviceName+' - '+response[i][j].deviceCategory.category+'</option>');
 									$('#devices').append($('<option id='+response[i][j].id+'>'+response[i][j].deviceLocation.devceLocationName+' - '+response[i][j].deviceName+' - '+response[i][j].deviceCategory.category+'</option>'));
 								}							  }
-							// console.log(response);							
-                            }
+							}
     });
 }
 
@@ -139,22 +138,24 @@ function postJson() {
 		var markers = { "startDate": document.getElementById('scdate').value,"endDate": document.getElementById('edate').value, "deviceId": deviceIds,"contnetId":numbers,"price":price.value};
 
 		$.ajax({
-			url: 'http://localhost:8080/Spring4MVCFileUploadDownloadWithHibernate/saveContents',
+			url: UniRL + '/saveContents',
 			type: 'POST',
 			contentType:'application/json',
 			data:JSON.stringify(markers),
 			dataType: 'json',
-			success: function(data)
+			success: function(response)
 			{
-				$(function(e)
-				{
-					alert(response.status)
-					$('#myModal').modal('toggle'); //or  $('#IDModal').modal('hide');
-					$("#successModal").modal();
-					var mymodal1=$('#successModal');
-					return false;
-				});
-				console.log(data);
+							   console.log(response);
+								if(response.responseCode=="200")
+								{
+								 	$('#smsg').text(response.responseMessage);
+									$('#myModal').modal('hide');
+								}
+								else if(response.responseCode=="400")
+								{
+									$('#smsg').css("color", "red");
+									$('#smsg').text(response.responseMessage);
+								}
 			},
 			error: function (response)
 			 {
@@ -166,12 +167,12 @@ function postJson() {
 			 },
 			failure: function(e) 
 			{
-				alert("sdfdsf");
+				//alert(response.responseMessage);
 				console.log(data);
 				$('#myModal').modal('hide');
 			}
 		});
-		$('#myModal').modal('hide');
+		//$('#myModal').modal('hide');
 	}
 }
 function getPrice() {
@@ -192,26 +193,72 @@ function getPrice() {
 		document.getElementById('scdate').value="";
 		document.getElementById('edate').value="";
 	}
+	else
+	{
 	var edate=document.getElementById('edate');
 	var did=document.getElementById('devices');
-	var deviceIds = $('#devices option:selected').map( function(i,el){
-    var result = [el.id];
-    //result[ el.id ] = $(el).val();
-    return result;	
-}).get();
-//console.log(y);
+	var deviceIds = $('#devices option:selected').map( function(i,el)
+	 {
+		var result = [el.id];
+		return result;	
+	 }).get();
 	var markers = { "startDate": scdate.value,"endDate": edate.value, "deviceId": deviceIds};
     $.ajax({
-        url: 'http://localhost:8080/Spring4MVCFileUploadDownloadWithHibernate/price',
+        url: UniRL + '/price',
         type: 'POST',
 		contentType:'application/json',
 		data:JSON.stringify(markers),
         dataType: 'json',
 		success:function(response){ 
-                                document.getElementById("price").value = response;
-							//console.log(response);
-                            }
+		
+							    var str=JSON.stringify(response);
+								//alert(str);							
+		                        if(response.responseCode=="200")
+								{
+								   document.getElementById("price").value = response.price;	
+								   $('#msg').css("color", "black");
+								   if(response.datesNotAvailable!="null")
+								   {
+									   for (var key1 in response.datesNotAvailable.deviceNameMap)
+											{
+												$('#table').append('<tr><td>'+ response.datesNotAvailable.deviceNameMap[key1]+'</td></tr>');
+												//$('#dNm1').text(response.datesNotAvailable.deviceNameMap[key]);
+												for (var key in response.datesNotAvailable.dateMap)
+												{
+													if(key1==key)
+													{
+														$('#table').append('<tr><td>'+ response.datesNotAvailable.dateMap[key]+'</td></tr>');
+														//$('#dt1').text(response.datesNotAvailable.dateMap[key]);
+													}
+												}
+											}								        						
+								   }
+								   $('#msg').text(response.responseMessage);
+								}
+								else if(response.responseCode=="400")
+								{									
+										$('#msg').css("color", "red");
+										for (var key1 in response.datesNotAvailable.deviceNameMap)
+											{
+												$('#table').append('<tr><td>'+ response.datesNotAvailable.deviceNameMap[key1]+'</td></tr>');
+												//$('#dNm1').text(response.datesNotAvailable.deviceNameMap[key]);
+												for (var key in response.datesNotAvailable.dateMap)
+												{
+													if(key1==key)
+													{
+														$('#table').append('<tr><td>'+ response.datesNotAvailable.dateMap[key]+'</td></tr>');
+														//$('#dt1').text(response.datesNotAvailable.dateMap[key]);
+													}
+												}
+											}
+									$('#msg').text(response.responseMessage);
+								}
+								console.log(response);
+                               }
+							   
     });
+	
+}
 }
 
 // generic functions
@@ -296,7 +343,7 @@ function gettodaydate()
         </div>
 		<div class="tablecontainer">
 		<div class="modal-body">
-		<table cellspacing="10" border="0" width="100%" class="table table-hover">
+		<table id="table" cellspacing="10" border="0" width="100%" class="table table-hover">
   <tr>
     <th>City</th>
     <th>Places</th>
@@ -327,18 +374,27 @@ function gettodaydate()
 <tr><td><b>Note :</b><i>Device Categoty - A will be played for 30 seconds 80times a day</i> </td>
 <td><i><b>Note :</b>	 Device Categoty - B will be played for 20 seconds 60times a day <i></td>
 <td><b>Total Cost:</b> <input class="noborder" type="input" name="price" id="price" readonly></td>
-
-  </tr>
+</tr>
+<tr>
+<td><label for="dNm1" id="dNm1"> <label></td>
+<td><label for="dNm2" id="dNm2"> <label></td>
+</tr>
+<tr>
+<td><label for="dt1" id="dt1"> <label></td>
+<td><label for="dt2" id="dt2"> <label></td>
+<td><label for="msg" id="msg"> <label></td>
+</tr>
 </table>
-</div>
-        
-          
-        </div>
+</div>      
+      </div>
         <div class="modal-footer">
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary" onclick="postJson();">Schedule Campaign</button>
-          </div>
+			<div class="modal-footer">
+				<label for="smsg" id="smsg"><label>
+			</div>
+		</div>
         </div>
       </div>
       
@@ -384,11 +440,11 @@ function gettodaydate()
 				</div>
 		</div>
 	 	<div class="well">
-	 		Go to <a href="<c:url value='/list' />">Users List</a>
+	 		Go to <a href="<c:url value='/companylist-${user.registerUser.id}' />">Users List</a>
 	 	</div>
    	</div>
 	
-	<script type="text/javascript">
+	<script type="text/javascript">	
         $('#myModal').on('hidden.bs.modal', function () {
 		$('#ct').append('<option value="" disabled selected hidden>Please Choose city</option>');	
         $('#location').empty();
@@ -399,6 +455,12 @@ function gettodaydate()
 		document.getElementById('scdate').value="";
 		document.getElementById('edate').value="";
 		document.getElementById('price').value="";
+		$('#msg').text("");
+		$('#smsg').text("");		
+		$('#dt1').text("");
+		$('#dt2').text("");
+		$('#dNm1').text("");
+		$('#dNm2').text("");
 });
     </script>
 </body>
